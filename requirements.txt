@@ -1,0 +1,51 @@
+# Requires Python 3.11 or 3.12 (see README > "Python version" for why).
+# Do NOT install into Python 3.13+ — scikit-learn/numpy have no prebuilt
+# wheels for very new Python versions yet, which forces pip to compile
+# them from source and (on Windows especially) that build is fragile/
+# likely to fail.
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+jinja2==3.1.4
+python-multipart==0.0.9
+itsdangerous==2.2.0
+
+# Phase 2 (ingestion)
+google-api-python-client==2.149.0
+google-auth==2.35.0
+Pillow==10.4.0
+numpy>=1.26.4
+
+# Phase 7 §4 (detector/embedder swap) — SCRFD detection + ArcFace-class
+# 512-d recognition, both via insightface's "buffalo_l" pack. Replaces
+# face_recognition/dlib (removed — no longer a dependency of this
+# project). onnxruntime is insightface's inference backend; ships
+# prebuilt wheels for 3.11/3.12 on CPU, no cmake/C++ toolchain needed
+# (unlike dlib). Model weights download on first use to
+# ~/.insightface/models, not vendored in this repo.
+insightface==0.7.3
+onnxruntime>=1.19.2
+
+# Phase 3 (clustering)
+scikit-learn==1.5.2
+
+# Phase 7 §6 (Postgres + pgvector) -- only needed for app/database_pg.py
+# and scripts/migrate_to_postgres.py. The live app (main.py) still runs
+# on SQLite (app/database.py); these are additive, not a replacement yet
+# -- see PHASE7_SCALE_ARCHITECTURE.md §12 for the cutover plan.
+psycopg2-binary==2.9.9
+
+# Phase 7 §9 (durable ingestion queue) -- app/ingest_queue.py. Requires a
+# Redis instance (REDIS_URL in .env) and a separate `rq worker ingestion`
+# process alongside uvicorn -- see README's "Running the ingestion
+# worker" section. "Process folder" enqueues a job here instead of
+# running ingestion as a FastAPI BackgroundTask.
+redis==5.0.8
+rq==1.16.2
+
+# Phase 7 §10 (S3-compatible object storage) -- app/object_storage.py.
+# Only actually used (boto3 is imported lazily) if S3_BUCKET is set in
+# .env; unset means the thumbnail caches stay on local disk exactly as
+# before this piece existed. Works against AWS S3 or anything
+# S3-compatible (MinIO, Cloudflare R2, Backblaze B2, DigitalOcean
+# Spaces, ...) via S3_ENDPOINT_URL.
+boto3==1.35.24

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAKAM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --ink: #f5f1e8;
+      --muted: #aaa99e;
+      --soft: #d5d0c3;
+      --gold: #d9b675;
+      --gold-light: #f1d49a;
+      --line: rgba(247, 240, 224, 0.12);
+      --panel: #191a17;
+      --panel-light: #20211d;
+    }
+
+    html { background: #11120f; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 10%, rgba(108,99,71,0.15), transparent 34rem), #11120f;
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: 0.48; cursor: not-allowed; }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+      padding: 0 max(24px, calc((100vw - 1180px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: rgba(17,18,15,0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand-button {
+      padding: 0; border: 0; background: transparent; cursor: pointer;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 13px; text-align: left;
+    }
+    .brand-mark {
+      display: grid;
+      width: 45px; height: 45px;
+      place-items: center;
+      border: 1px solid rgba(241,212,154,0.28);
+      border-radius: 50%;
+      background: #0c0d0b;
+    }
+    .brand-mark img {
+      width: 36px; height: 36px;
+      border-radius: 50%; object-fit: contain;
+    }
+    .brand-copy { display: grid; }
+    .brand-copy strong {
+      font-family: "DM Serif Display", serif;
+      font-size: 20px; font-weight: 400; letter-spacing: 0.01em;
+      color: var(--soft);
+    }
+    .brand-copy small {
+      margin-top: 1px; color: var(--muted);
+      font-size: 10px; letter-spacing: 0.04em;
+    }
+    .site-header nav { display: flex; align-items: center; gap: 6px; }
+    .site-header nav button {
+      min-height: 44px; padding: 0 16px;
+      border: 0; border-radius: 999px;
+      background: transparent;
+      font-size: 14px; font-weight: 600;
+    }
+    .site-header nav button:hover { background: rgba(255,255,255,0.06); }
+    .nav-muted { color: var(--muted); }
+
+    /* ── Find page layout ── */
+    .find-page {
+      width: min(100% - 32px, 480px);
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+
+    .find-intro { margin-bottom: 30px; text-align: center; }
+
+    .eyebrow {
+      display: inline-block;
+      color: var(--gold-light);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.17em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 12px 0 13px;
+      font-family: "DM Serif Display", serif;
+      font-size: clamp(42px, 10vw, 59px);
+      font-weight: 400;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+    }
+    h1, h2, p { margin-top: 0; }
+
+    .find-intro p {
+      max-width: 425px; margin: 0 auto;
+      color: var(--soft); font-size: 16px; line-height: 1.65;
+    }
+
+    /* ── Camera card ── */
+    .camera-card {
+      overflow: hidden;
+      border: 1px solid rgba(241,212,154,0.2);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.42);
+    }
+
+    .camera-screen {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4 / 5;
+      margin: 10px;
+      border-radius: 21px;
+      background: linear-gradient(rgba(22,23,20,0.36), rgba(22,23,20,0.7));
+      isolation: isolate;
+    }
+
+    /* Photo slideshow fills camera-screen background */
+    .camera-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center top;
+      opacity: 0;
+      transition: opacity 1.4s ease;
+      z-index: -1;
+    }
+    .camera-slide.is-active { opacity: 1; }
+
+    .camera-glow {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      background: radial-gradient(circle at 50% 39%, rgba(218,181,115,0.12), transparent 42%);
+      pointer-events: none;
+    }
+
+    .camera-screen video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .camera-screen video.live { opacity: 1; }
+
+    /* Corner brackets */
+    .corner {
+      position: absolute;
+      z-index: 3;
+      width: 28px; height: 28px;
+      border-color: rgba(255,255,255,0.52);
+    }
+    .corner-a { top: 18px; left: 18px; border-top: 1px solid; border-left: 1px solid; border-radius: 8px 0 0; }
+    .corner-b { top: 18px; right: 18px; border-top: 1px solid; border-right: 1px solid; border-radius: 0 8px 0 0; }
+    .corner-c { bottom: 18px; left: 18px; border-bottom: 1px solid; border-left: 1px solid; border-radius: 0 0 0 8px; }
+    .corner-d { right: 18px; bottom: 18px; border-right: 1px solid; border-bottom: 1px solid; border-radius: 0 0 8px; }
+
+    /* Camera overlay content */
+    .camera-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      padding: 36px;
+      text-align: center;
+      transition: opacity 0.4s ease;
+    }
+    .camera-overlay.hidden { opacity: 0; pointer-events: none; }
+
+    .face-guide {
+      position: relative;
+      display: block;
+      width: 132px; height: 165px;
+      border: 1px solid rgba(241,212,154,0.72);
+      border-radius: 50% 50% 45% 45%;
+      box-shadow: 0 0 50px rgba(217,182,117,0.16);
+    }
+    .face-guide-dot {
+      position: absolute;
+      right: 16px; bottom: 28px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--gold-light);
+      box-shadow: 0 0 0 6px rgba(241,212,154,0.12);
+    }
+
+    .camera-overlay strong {
+      display: block;
+      margin-top: 25px;
+      font-family: "DM Serif Display", serif;
+      font-size: 25px; font-weight: 400;
+    }
+    .camera-overlay p {
+      max-width: 300px;
+      margin: 8px 0 0;
+      color: #d0ccc1;
+      font-size: 14px; line-height: 1.55;
+    }
+
+    .camera-loader {
+      width: 54px; height: 54px;
+      border: 2px solid rgba(255,255,255,0.14);
+      border-top-color: var(--gold-light);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .camera-tip {
+      position: absolute;
+      z-index: 4;
+      bottom: 24px; left: 50%;
+      display: flex;
+      align-items: center;
+      width: max-content;
+      max-width: calc(100% - 48px);
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      background: rgba(12,13,11,0.7);
+      font-size: 13px;
+      transform: translateX(-50%);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .camera-tip.visible { opacity: 1; }
+    .camera-tip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #8fb997;
+    }
+
+    /* ── Camera actions ── */
+    .camera-actions { padding: 14px 18px 20px; }
+
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      gap: 9px;
+      padding: 0 18px;
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      background: var(--gold);
+      color: #18150f;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: inset 0 1px rgba(255,255,255,0.35);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .primary-button:hover { border-color: var(--gold-light); background: var(--gold-light); }
+    .primary-button:disabled { opacity: 0.48; cursor: not-allowed; }
+
+    .camera-actions .primary-button {
+      width: 100%;
+      min-height: 57px;
+      font-size: 16px;
+    }
+
+    .privacy-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .secure-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #8fb997;
+      box-shadow: 0 0 0 4px rgba(143,185,151,0.1);
+    }
+
+    /* ── How it works ── */
+    .how-it-works {
+      display: grid;
+      margin-top: 48px;
+      gap: 0;
+    }
+    .how-it-works div {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .how-it-works span {
+      color: var(--gold);
+      font-family: "DM Serif Display", serif;
+      font-size: 13px;
+    }
+    .how-it-works p { margin: 0; color: var(--soft); font-size: 14px; }
+
+    /* ── Result / error notices ── */
+    .notice {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .notice-error {
+      border: 1px solid rgba(199,139,126,0.3);
+      background: rgba(199,139,126,0.08);
+      color: #d2a092;
+    }
+    .notice-success {
+      border: 1px solid rgba(130,178,139,0.25);
+      background: rgba(130,178,139,0.08);
+      color: #9bc5a3;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .gallery-item {
+      display: block;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .gallery-item img {
+      width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+      transition: opacity 0.2s;
+    }
+    .gallery-item:hover img { opacity: 0.82; }
+    .gallery-caption {
+      display: block;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── Camera icon SVG ── */
+    .camera-icon { display: inline-flex; }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .site-header { height: 72px; padding: 0 16px; }
+      .brand-copy small { display: none; }
+      .find-page { width: min(100% - 24px, 480px); padding-top: 36px; }
+      .camera-card { border-radius: 23px; }
+      .camera-screen { margin: 8px; border-radius: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="/find" class="brand-button" style="text-decoration:none">
+      <div class="brand">
+        <span class="brand-mark">
+          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAulBMVEUAAAD///sAAAP///r8+fT///3//fr//////Pf8+PX/+fP/+/j++PT/+vX//ff///jy7uugnZseHRwvLy7h3drCv7zn4+Dg3dhSUlCXlpXu6uivrKlCQkCamZja19U2NDJ0cW9mZGImJyhJSEZvbGsYFhSJiYfMy8g+PTzEwb5ZV1Wko6GNjYsrKSYwMTK1tbGBfnwYFxUQDAl6enokJClVVVbPz9BqaWXX1M2qqqvCxLteX1/s6eHy8/OHK5cCAAANc0lEQVR4nO2ca3uquhKATQkhV8ALqGBRayu12o3Vs9bqOt39/3/rTLAXV9Uq4GWf/eT91KqBDCSTmclMajWDwWAwGAwGg8FgMBgMBoPBYDAYDAaDwWAwGAwGg8FgMBgMBoPBYDAYDAbD/xlXl+7AGbi/dAdOzcwJXy7dh5MytzlFvy7diyPQ7/WaGx9eXdWGGGMp/KcLdOl49Lupz7jLXeZPrnt/ftfwKaaSoflluradYsqv0W05iHIuAc5d4kTxj7WvMw9bWcRI97h9LMybUL15nCatsJWk9du/Dmq0qPuWAukosizPsqiSXFn28/L9N33EWTKwpL385kLnQHe2Xw8xolQIJoQgyH8e7280jAiTCtmtoD4Y3i7rQQshoTC1wsHqN9cWJ798LlnjxBLsZ5QipBimlABUMBhwFssev2+UIXgcdlRfUzF34wS7GCvUHuW/oNL3BUfXp+z7IXRS5HKuEImSIJ7GQcu3iZDSkr+/kbHfQpiRcEOH9Ka+Lbnr/Ya/Y9AyjKH0hH0/iJgRBi8j6XYWb5/cDOMQusmRrwXY1D2wDIx8wpQ73Xa9mykT0LY1qg1smKRecuG1YhQiBhMvGH35/LZlK8bsyY5WvmDE7+y45uME2hI2r7Up3XWFszEjilOS9rd89RISUJNbxegxkKB1t3tt0UqIWde1LNmnsU5NZnNuhbdbvtF97zLKsZrnw3KdR19hkr7/amvbpwApbMfH7m9RFili3A52z5NRy8LY2livWxRbP/dd/BoxRuKNp3NWblqUCfr9MJogjOkXhZKBgO39l58LmMf1S0r4BHNF+A/f/EL3rW5hjqa1tQE5J4xGj9Dz77quv7yFuegsL+gEJ0SKcL9/Ooe3iOqfEvaZkPi757LW1AJ75quSPh/XSKrwkKVqacNc/BzLCWH27NB72JIcMJ5Pwz1T3G/uH0Iw3Oagbtx3L3ZsM5Ic5oLAbyaEoa1mwRkIqCTLA3qqJ1TXA0dWj+cr8PgUZo8HS3gXCUUuM07vKReH24uxh2mYSxsjjg4do5pbW9LL2KUZkfZh6iJ/F88WtgL4s4+5KjaxUi6dH/t/dnyYosmhv9UjMqQYgbYJPO4OC92or6TYax2cgAHixRzvDsXYb/YtTAt1Fx5OBm12megnJKXcL9aiizhJwZqxC/VW+1mgiLNi9zoCi1fpBkUawLtIXMkEps+FbqQ1cUqpf1Oo1REYIGxvcyh2c1W70fE0bBcPYMPN0NlDUbFV4rHOwO0/XD2t4Uv37G5wm+ISXU1UsbXwnYxyVqJZFW58bNWLNxu6Sm4LBuxDK+4za9MOkvagRLufdinz5M6RbokHWoW5pVjxbb2rWscpF3WJVDHNXZ3Mla/FW2nFXy54PREqLNWwNKkrSiga7SqUu18dSffjKt/HBo5EqMhZrYyBLd0yKqo87MxbCSNbemfd6n60+XmNjD6R3scGR9ZOTx4lHtkYHeobHoUbIb3cVLiqNZ4Rda0DAmCVuLWxc9Zp0fCltwor98HPBGh02h3FMcHOWfeD7t4lvGUUU+y7leP9D2kUpXE+ELdp5i7hVrUbFOTOV55WbTFSnIT9WkhFtfWxySilmNjheLuEU8LdLR+fjoavULd2n9hSeukCbCpPyt7+ZruZ2QxbVO96trcavDHhuMr1C3MjOZl1JZXMyYOnQ0+iSqZ43ZY4axMimEu2eTuZwAVDGBVpEsleKeeU/arVQAMsPakqvcOlLcV97fHap3/uOLyTERVVuX5hRjYHKJn8p9b1HRw8Uxot9jfbTY/IPEfnKbNAxNsNCQPCzmsIjx0pGYqWegIJWCvwKvhagZZ401UzC6vNARkQ1ap2g4L0A+K0ZvDWFr7CCASktOKS30VMh28fAq4TKjacz4CeWcIPloi79ZSQb3ctD+HmFWM/C22qpLKijU3qwL2UhC9Em2/9I0T5ZwhjV2Es7HB2tzkP3XM7pB+EkuM9qVYHktqUu56X6j2GDY8zc8+sSz+ZI06P9HSnYZSOd2jkibrUKNXBLCai0ald/USpi6Wa3YQErO/pcUbqzocELv7lUnn6IKJr+dkRAqhbx4H+DBSaPbhgDsgELBzlen62XHuTL/XlkRy6VfYAvrmIhM37ey3UsJ2v+q5l4yQN4uk0m0Q2ccixosZzwcjkAsUsgyB8Be83DMbN2m0qbKKdfZHn7OqkXSalXTEA+NdyvLxvjGLCBOucXcKXiBAmMeaC2Cx9qTVnICTyKM9RhDge587vklfX83HYti0vZ5sdd1L07afIxbBAw+vKvQy7rRfq+/HvScvXhMGstmSKW8VyBNbpkjwCpHEvkMKTgY1l+cF4uZxNQgT/KCvdyLIZCllqezJH56ZRmMw2stHzoFJny1D3dILjW8b74iXDOskKx3/u0V7pxHe7pGPcIByjuN/oDwfDx9rZ5+AIcUzXa58eY8flkrA/Au9XtaYtSclYfOZyq8zm7ZFoc259ibH/lbquHrhr0e8rvR1ecj+lgZUqlkJxVMDa3pJuMkxsCjMn/JCxioRLT2deXCxXt0W5f7Pl9uPQVkyQ6Ho1Qa/0Bk7JUZoJ5jfyazzF7fjc1Q8PlrR3LE+zV1hDOLLSQe4FtaiLNmv8DiER72mICaKoVSnKVZzMlWxnv7t/5wYccp+DICSlk6dCQVa+xDWSYBudeTkMv03zXIxDZGEplatDLn4Zr+qqduNLlM/nGQgopHr98+tKodn9NNFOPf7m/Awz4VBXKYr8TpmF7KrW96UHynqRIcZE4H7JbRkSfNKF5MHmaG+S8HCaRtHPknWYV7V7Jr1BbRjpCo/rGpJkfQt2JgRDf59wU/YeJCyWQlcUMBV85f5OidbMIAmI+anZGv/1mK5v9drH2/V+Gr3cDjsfRah34vSW/lME0w/cFBTp4UnlZ1Vu14dJTnwPc2W1q5aU55OqOQ2FIHpTiKXT1Wx4puLkca9EgLIiMtenvxBf5XcvRjEDA5iwsRZUgsZOKgdqe4GtZVshiJPXX9YRI6cdprpEgiIWrHTmDHGedmfTNLSoLtl91lqgMc2FFUGl3f27GFNQ+wTBO7QRiApPDfzAe8xEdJLMBBg176r3Vzx+7/vIASvCgvvr4nLbf88BaWZ6VaJytVaWsu9+wUjgCrWuh53e6GEeJ47Fweud1mLExOspKvJ32KHXNqUKFleKRLJ+22aAXTAHdtTF7mWReVwKkq5tudx0fcIYCsCSgsFyRF22fttt1tKPLIz8v9vB+OuQ7KSESGY/lylx6YXwwkj4NQiRaREzLSK4EdHsuCbx0+31zxB/tdBWZsRTY8M2zb+4hX5yJYuvjku2dRuvVhvoWm7QZeDV525E4SvvojNtY1DZQnoF14AuczF1ik6a3x7n1N+qioeIS3ZXa8TI0wXx/vAIRaVPw4w5FsWgr8GYKWqsP05gQBUsqJuA9rJ25aqPwenLv+uG4EZQlC0qBlHuY98GnY2pZ/tJcQl1iRPFhfa/blquFJu1wh+kLndXU3se6ari0uG0vHt3sSS5nnSSePjYY28Jc0Uu0SSYFnks/dDlig12X7BDMclWQ3NRp1haVSLbo0goSQmbrHY5YkuSwls8gSudAo16vsuF/636TYnwG2+zb4Qlq5As1PAFLEkfNf6PrESE9YXwIvWCHZ9yt/W93zqgzPn1rl86QlbI3q1bnCafubgZkV5hgzARvECl2Y9Xgb3nzUyBP7gDd+ZtmIKZFb0HHMqQwRz8/G8ElkRho35meehznuxTeh0muJXujfskQn2MpV+WPLhOepMpkejTUGljXUlXTDPf+NT115Jbe9/GdEZgXR9yNMvU+qgK6mGlRLl4Wn5HW34+rGuEtdYqJuHUw2R9uU+cdHcBWOcVBDxkJ3KJOFlZHksdPKwSCUvdj6Bxh6j8bRST8Kf3R9ZiTPDKbd5GD/RafvzH3lv0HC50VmIztRSM6kI9+kLTx6vDNnQMD3/dKziAwMNiuurz1SrvCFO83fB7BC16aG91BiFtTzBYvdUOHLqqPYCha+u0v4xwEhQ3j/pYpw2+VcZMbZ1iB7N5myWuT2I7vLf6/BAXDEkhqtneoJAH+uCb9G7pSJ2TWNwAHLgeJ1H3x/1o2dJJkt0A+uZtdmuRWLn5etDBA3oPmFqUUjs5Qo7JQHFMfcwlKZf+t3QU556QEnHOnZnOPtd7j7UvwqRgRIdFKgruf/9MgvJ72Os86IP8lERlj7nrhBaYfhKsW+Tn1kNXn23yRSsHhKvo7NXL7zTbuksVcnDHLYIsRKKpXspBrjlMoD+TqH47kvv3l0k6ym2jmDhVXBR4j4Px/GHxccG5grm4toqNQQXxh4sej9Q7cnxyoPMAZu/e+VCfxnbpkxCPzQAGvj4PSUvYYyVLuv/BgFxjEJH80H8tfMmti59SdgLAMxN5wVmiOLn4QYgnIUC5ZBn4oBdLMD4lMDxboF+6Y8SZf96S3jMBOqbJXbBaOWcv/9pjyJfI5XK7Hf5vQeeNoPMfpnNGmr6oaCz94+nar/9KLbPG62ap37+MwoGf/0f+/RIaDAaDwWAwGAwGg8FgMBgMBoPBYDAYDAaDwWAwGAwGg8FgMBgMBoPBYDD8k/kffXbdxv2LidkAAAAASUVORK5CYII=" alt="">
+        </span>
+        <span class="brand-copy">
+          <strong>CHAKAM</strong>
+          <!-- <small>Church memories, beautifully found</small> -->
+        </span>
+      </div>
+    </a>
+    <nav>
+      <a href="/admin/login" style="text-decoration:none">
+        <button class="nav-muted">Admin</button>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main find page -->
+  <main class="find-page">
+
+    <section class="find-intro">
+      <span class="eyebrow">Your moments are waiting</span>
+      <h1>Find the photos you're&nbsp;in.</h1>
+      <p>Take a quick selfie and we'll privately match your face with photos from our church community.</p>
+    </section>
+
+    <div class="camera-card">
+      <div class="camera-screen" id="cameraScreen">
+
+        <!-- Slideshow slides (behind everything) -->
+        <div class="camera-slide is-active" style="background-image:url('/static/images/IMG_0227.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_0279.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_2112.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_2198.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_5013.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_5728.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_5744.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_6992.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_9571.jpg')"></div>
+        <div class="camera-slide" style="background-image:url('/static/images/IMG_9575.jpg')"></div>
+
+        <div class="camera-glow"></div>
+
+        <!-- Live camera video -->
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <canvas id="captureCanvas" hidden></canvas>
+
+        <!-- Idle / requesting overlay -->
+        <div class="camera-overlay" id="overlayIdle">
+          <span class="face-guide"><span class="face-guide-dot"></span></span>
+          <strong>You're in control</strong>
+          <p>Your selfie is only used to find your photos and is never saved.</p>
+        </div>
+
+        <!-- Requesting overlay -->
+        <div class="camera-overlay hidden" id="overlayRequesting">
+          <span class="camera-loader"></span>
+          <strong style="margin-top:25px">Opening your camera…</strong>
+        </div>
+
+        <!-- Live tip -->
+        <div class="camera-tip" id="cameraTip">
+          <span class="camera-tip-dot"></span>
+          Perfect — look toward the camera
+        </div>
+
+        <!-- Corner brackets -->
+        <span class="corner corner-a"></span>
+        <span class="corner corner-b"></span>
+        <span class="corner corner-c"></span>
+        <span class="corner corner-d"></span>
+      </div>
+
+      <div class="camera-actions">
+        <button class="primary-button" id="primaryBtn" onclick="handlePrimaryBtn()">
+          <svg aria-hidden="true" fill="none" height="18" viewBox="0 0 24 24" width="18">
+            <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+            <circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+          Start camera
+        </button>
+        <p class="privacy-note">
+          <span class="secure-dot"></span>
+          Private, secure, and deleted after matching
+        </p>
+      </div>
+    </div>
+
+    <!-- Notices -->
+    <div id="noticeError" class="notice notice-error" hidden></div>
+    <div id="noticeResult" class="notice notice-success" hidden></div>
+
+    <!-- How it works -->
+    <section class="how-it-works" aria-label="How it works">
+      <div><span>01</span><p>Take a clear selfie in good light.</p></div>
+      <div><span>02</span><p>We look only through approved church photos.</p></div>
+      <div><span>03</span><p>Save the moments you love.</p></div>
+    </section>
+
+  </main>
+
+  <script>
+    // ── Slideshow ──
+    (function () {
+      const slides = document.querySelectorAll('.camera-slide');
+      let current = 0;
+      let timer = setInterval(next, 3500);
+
+      function next() {
+        slides[current].classList.remove('is-active');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('is-active');
+      }
+
+      window._stopSlideshow = function() {
+        clearInterval(timer);
+        slides.forEach(s => s.style.opacity = '0');
+      };
+      window._startSlideshow = function() {
+        slides.forEach(s => { s.style.opacity = ''; s.classList.remove('is-active'); });
+        current = 0;
+        slides[0].classList.add('is-active');
+        timer = setInterval(next, 3500);
+      };
+    })();
+
+    // ── Camera + capture logic ──
+    var _state = 'idle'; // idle | requesting | live | captured
+    var _stream = null;
+
+    var video = document.getElementById('cameraVideo');
+    var canvas = document.getElementById('captureCanvas');
+    var primaryBtn = document.getElementById('primaryBtn');
+    var overlayIdle = document.getElementById('overlayIdle');
+    var overlayRequesting = document.getElementById('overlayRequesting');
+    var cameraTip = document.getElementById('cameraTip');
+    var noticeError = document.getElementById('noticeError');
+    var noticeResult = document.getElementById('noticeResult');
+
+    function setState(s) {
+      _state = s;
+      overlayIdle.classList.toggle('hidden', s !== 'idle');
+      overlayRequesting.classList.toggle('hidden', s !== 'requesting');
+      cameraTip.classList.toggle('visible', s === 'live');
+      video.classList.toggle('live', s === 'live' || s === 'captured');
+
+      if (s === 'idle') {
+        primaryBtn.disabled = false;
+        primaryBtn.innerHTML = cameraIconHTML() + ' Start camera';
+        window._startSlideshow && _startSlideshow();
+      } else if (s === 'requesting') {
+        primaryBtn.disabled = true;
+        primaryBtn.innerHTML = 'Opening camera…';
+        window._stopSlideshow && _stopSlideshow();
+      } else if (s === 'live') {
+        primaryBtn.disabled = false;
+        primaryBtn.innerHTML = cameraIconHTML() + ' Find my photos';
+      } else if (s === 'captured') {
+        primaryBtn.disabled = false;
+        primaryBtn.innerHTML = cameraIconHTML() + ' Try again';
+        stopStream();
+      }
+    }
+
+    function cameraIconHTML() {
+      return '<svg aria-hidden="true" fill="none" height="18" viewBox="0 0 24 24" width="18"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.7"/></svg>';
+    }
+
+    function showError(msg) {
+      noticeError.textContent = msg;
+      noticeError.hidden = false;
+      noticeResult.hidden = true;
+    }
+
+    function clearNotices() {
+      noticeError.hidden = true;
+      noticeResult.hidden = true;
+      noticeResult.innerHTML = '';
+    }
+
+    function stopStream() {
+      if (_stream) {
+        _stream.getTracks().forEach(t => t.stop());
+        _stream = null;
+      }
+    }
+
+    async function startCamera() {
+      clearNotices();
+      setState('requesting');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('Your browser doesn’t support camera access.');
+        setState('idle');
+        return;
+      }
+      try {
+        _stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        video.srcObject = _stream;
+        await video.play();
+        setState('live');
+      } catch(err) {
+        if (err.name === 'NotAllowedError') showError('Camera access was denied. Please allow camera access to find your photos.');
+        else if (err.name === 'NotFoundError') showError('No camera found on this device.');
+        else showError('Couldn’t start the camera. Please try again.');
+        setState('idle');
+      }
+    }
+
+    async function captureAndFind() {
+      clearNotices();
+      if (!video.videoWidth) { showError('Camera isn’t ready yet — give it a moment.'); return; }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      setState('captured');
+      primaryBtn.disabled = true;
+      primaryBtn.innerHTML = 'Looking…';
+
+      try {
+        var resp = await fetch('/find/capture', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        var payload = await resp.json();
+
+        if (!resp.ok) {
+          showError(payload.error || payload.message || 'Something went wrong. Please try again.');
+        } else if (payload.status === 'match' && Array.isArray(payload.photos)) {
+          renderMatches(payload.message, payload.photos);
+        } else {
+          noticeResult.textContent = payload.message || 'Got your selfie!';
+          noticeResult.hidden = false;
+        }
+      } catch(e) {
+        showError('Couldn’t reach the server. Check your connection and try again.');
+      } finally {
+        primaryBtn.disabled = false;
+        primaryBtn.innerHTML = cameraIconHTML() + ' Try again';
+      }
+    }
+
+    function renderMatches(message, photos) {
+      noticeResult.innerHTML = '';
+      var p = document.createElement('p');
+      p.style.margin = '0 0 4px';
+      p.textContent = message || ('Found ' + photos.length + ' photo(s) of you!');
+      noticeResult.appendChild(p);
+
+      var grid = document.createElement('div');
+      grid.className = 'gallery-grid';
+      photos.forEach(function(photo) {
+        var a = document.createElement('a');
+        a.className = 'gallery-item';
+        a.href = photo.drive_view_url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        var img = document.createElement('img');
+        img.src = photo.thumb_url;
+        img.alt = photo.folder_label || 'Matched photo';
+        img.loading = 'lazy';
+        a.appendChild(img);
+        if (photo.folder_label) {
+          var cap = document.createElement('span');
+          cap.className = 'gallery-caption';
+          cap.textContent = photo.folder_label;
+          a.appendChild(cap);
+        }
+        grid.appendChild(a);
+      });
+      noticeResult.appendChild(grid);
+      noticeResult.hidden = false;
+    }
+
+    function handlePrimaryBtn() {
+      if (_state === 'idle') startCamera();
+      else if (_state === 'live') captureAndFind();
+      else if (_state === 'captured') { setState('idle'); }
+    }
+
+    window.addEventListener('pagehide', stopStream);
+  </script>
+
+</body>
+</html>

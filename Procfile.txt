@@ -1,0 +1,2 @@
+web: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+worker: python -c "from rq.cli import main; main()" worker ingestion --url $REDIS_URL -w rq.worker.SimpleWorker

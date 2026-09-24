@@ -1,0 +1,673 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Project Aperture inspired palette — cinematic, dark, editorial */
+  --paper: #211d20;
+  --paper-raised: #2a262a;
+  --ink: #f2efe9;
+  --ink-soft: #a8a29e;
+  --rule: rgba(242, 239, 233, 0.14);
+  --wine: #c98a4b;
+  --wine-soft: rgba(201, 138, 75, 0.14);
+  --brass: #c98a4b;
+  --ok: #7fae87;
+  --error: #d9776a;
+}
+
+/* Full-page background slideshow (all pages) — see
+   /static/background-slideshow.js for the photo sets/init logic. Sits
+   behind everything (z-index -1); every panel/card in this file already
+   has an opaque background, so content stays legible over it. A dark
+   overlay + vignette keeps contrast consistent regardless of which
+   photo happens to be showing. */
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  background: var(--paper);
+}
+.bg-slideshow-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.8s ease;
+}
+.bg-slideshow-layer.is-active { opacity: 1; }
+.bg-slideshow-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(23, 21, 22, 0.55) 0%, rgba(23, 21, 22, 0.8) 100%);
+  pointer-events: none;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 20px;
+  margin-bottom: 36px;
+  background: rgba(33, 29, 32, 0.72);
+  backdrop-filter: blur(6px);
+  border-radius: 2px;
+}
+
+.masthead h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.masthead .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.logout-form button {
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.logout-form button:hover { border-color: var(--ink); color: var(--ink); }
+
+.panel {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 28px 30px;
+  margin-bottom: 32px;
+}
+
+.panel h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 19px;
+  margin: 0 0 4px;
+}
+
+.panel .hint {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin: 0 0 20px;
+}
+
+label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="url"],
+input[type="password"] {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.18);
+  font-family: 'Inter', sans-serif;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+input::placeholder { color: var(--ink-soft); opacity: 0.7; }
+input:focus {
+  outline: 1px solid var(--wine);
+  outline-offset: 1px;
+  border-color: var(--wine);
+}
+
+.field { margin-bottom: 16px; }
+
+.btn {
+  background: var(--wine);
+  color: #211d20;
+  border: none;
+  padding: 11px 22px;
+  border-radius: 2px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.btn:hover { background: #e0a468; }
+.btn:active { transform: translateY(1px); }
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12.5px;
+}
+
+.notice {
+  padding: 11px 14px;
+  border-radius: 2px;
+  font-size: 13.5px;
+  margin-bottom: 18px;
+  border: 1px solid var(--rule);
+}
+.notice.error { background: rgba(217, 119, 106, 0.12); color: var(--error); border-color: rgba(217, 119, 106, 0.35); }
+.notice.success { background: rgba(127, 174, 135, 0.12); color: var(--ok); border-color: rgba(127, 174, 135, 0.35); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+thead th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule);
+  padding: 0 10px 8px;
+}
+tbody td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+
+.week-label { font-weight: 500; }
+.folder-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.stamp {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.stamp.pending { color: var(--brass); }
+.stamp.processing { color: #7fa3c9; }
+.stamp.paused { color: var(--brass); }
+.stamp.processed { color: var(--ok); }
+.stamp.error { color: var(--error); }
+.stamp.cancelled { color: var(--ink-soft); }
+
+.progress-track {
+  margin-top: 6px;
+  width: 120px;
+  height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #7fa3c9;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.progress-count {
+  display: block;
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--error);
+  border: 1px solid var(--error);
+}
+.btn-danger:hover { background: rgba(217, 119, 106, 0.12); }
+
+.empty-state {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-style: italic;
+  padding: 6px 0;
+}
+
+/* Login page — centers the card; the full-page slideshow (see above)
+   now provides the cinematic photo background instead of a single
+   static image, consistent with every other page. */
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.login-card {
+  background: rgba(33, 29, 32, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 44px 38px;
+  width: 100%;
+  max-width: 380px;
+}
+.login-card h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 26px;
+  margin: 0 0 4px;
+}
+.login-card .hint {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  margin: 0 0 24px;
+}
+
+/* Member-facing selfie capture (Phase 4) */
+.page-narrow { max-width: 480px; }
+
+.masthead-simple {
+  justify-content: flex-start;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--wine);
+  border: 1px solid var(--wine);
+}
+.btn-secondary:hover { background: var(--wine-soft); }
+
+.notice-privacy {
+  background: var(--wine-soft);
+  color: var(--ink);
+  border: 1px solid rgba(201, 138, 75, 0.35);
+}
+
+.camera-frame {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #000;
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border: 1px solid var(--rule);
+  position: relative;
+}
+
+/* Photo slideshow inside the camera frame */
+.camera-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: opacity 0.6s ease;
+}
+.camera-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.camera-slide.is-active {
+  opacity: 1;
+}
+
+.camera-frame video {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Mirror the preview so it feels like a mirror while framing a selfie;
+     the captured frame sent to the backend is NOT mirrored. */
+  transform: scaleX(-1);
+}
+
+/* CHAKAM branding — eyebrow uses Fraunces Bold, capitalised */
+.masthead .eyebrow,
+.masthead .eyebrow a,
+.login-card .eyebrow {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wine);
+}
+
+/* Page headings also go bold (not italic) for CHAKAM */
+.masthead h1,
+.login-card h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.find-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.find-actions .btn { flex: 1 1 auto; }
+.photo-match-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.photo-match-list li a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 2px;
+  background: rgba(242, 239, 233, 0.06);
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--rule);
+}
+.photo-match-list li a:hover {
+  background: rgba(242, 239, 233, 0.12);
+}
+
+.cluster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.cluster-card {
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 12px;
+  background: var(--paper-raised);
+}
+.cluster-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.cluster-id {
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+}
+.cluster-thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.cluster-thumb {
+  position: relative;
+}
+.cluster-thumb img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  background: rgba(242, 239, 233, 0.05);
+}
+.cluster-thumb-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cluster-thumb-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.cluster-thumb-btn img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  background: rgba(242, 239, 233, 0.05);
+  transition: opacity 0.15s ease;
+}
+.cluster-thumb-btn:hover img {
+  opacity: 0.8;
+}
+.cluster-thumb-count {
+  position: absolute;
+  bottom: 22px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox[hidden] {
+  display: none;
+}
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+}
+.lightbox-panel {
+  position: relative;
+  background: var(--panel-bg, #2a262a);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 16px;
+  max-width: 900px;
+  width: 92%;
+  max-height: 82vh;
+  overflow-y: auto;
+  z-index: 1;
+}
+.lightbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-family: 'Fraunces', serif;
+}
+.lightbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.eyebrow-link {
+  color: inherit;
+  text-decoration: none;
+}
+.eyebrow-link:hover { text-decoration: underline; }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: rgba(242, 239, 233, 0.05);
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.menu-card:hover {
+  border-color: var(--wine);
+  background: var(--wine-soft);
+}
+.menu-card-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.gallery-item {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(242, 239, 233, 0.04);
+}
+.gallery-item img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.15s ease;
+}
+.gallery-item:hover img { opacity: 0.85; }
+.gallery-caption {
+  display: block;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.move-face-control {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+.move-face-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+}
+.move-face-control .btn-small {
+  flex: 0 0 auto;
+}
+
+.group-bar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper-raised);
+  border: 1px solid var(--wine);
+  border-radius: 2px;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+}
+.group-bar .hint { margin: 0; }
+
+.group-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.group-select input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--wine);
+  cursor: pointer;
+}
+
+.lightbox-grid .cluster-thumb img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  background: rgba(242, 239, 233, 0.05);
+}

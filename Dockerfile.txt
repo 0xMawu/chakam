@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN python -c "import urllib.request, os, zipfile; url='https://github.com/deepinsight/insightface/releases/download/v0.7/buffalo_l.zip'; os.makedirs('/root/.insightface/models', exist_ok=True); urllib.request.urlretrieve(url, '/root/.insightface/models/buffalo_l.zip'); z=zipfile.ZipFile('/root/.insightface/models/buffalo_l.zip'); [z.extract(f, '/root/.insightface/models/buffalo_l') for f in z.namelist() if any(m in f for m in ['det_10g', 'w600k_r50', 'genderage'])]; z.close(); os.remove('/root/.insightface/models/buffalo_l.zip')"
+COPY . .
+
+RUN mkdir -p data
+
+CMD ["python", "start.py"]

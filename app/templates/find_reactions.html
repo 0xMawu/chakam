@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Reaction Photos — CHAKAM</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-slideshow" aria-hidden="true"></div>
+  <div class="bg-slideshow-overlay" aria-hidden="true"></div>
+
+  <div class="page page-narrow">
+    <div class="masthead masthead-simple">
+      <div>
+        <span class="eyebrow"><a href="/find" class="eyebrow-link">CHAKAM</a></span>
+        <h1>Find reaction photos</h1>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="hint">
+        This is coming soon — a selfie-based search for moments like
+        singing, dancing, smiling or laughing, standing, and clapping,
+        the same way <a href="/find/photos">Find my photos</a> works today.
+        See <code>docs/REACTION_FINDER.md</code> in the project for the
+        current build plan and what's realistic per category.
+      </p>
+
+      <div class="notice notice-privacy">
+        Not live yet — nothing you do on this page is sent anywhere.
+      </div>
+
+      <a href="/find" class="btn btn-secondary">&larr; Back to menu</a>
+    </div>
+  </div>
+
+  <script src="/static/background-slideshow.js"></script>
+  <script>initBackgroundSlideshow('inside');</script>
+</body>
+</html>

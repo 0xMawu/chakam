@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAKAM</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-slideshow" aria-hidden="true"></div>
+  <div class="bg-slideshow-overlay" aria-hidden="true"></div>
+
+  <div class="page page-narrow">
+    <div class="masthead masthead-simple">
+      <div>
+        <span class="eyebrow">CHAKAM</span>
+        <h1>What are you looking for?</h1>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="hint">
+        Pick one below — each uses a quick live selfie to find your photos,
+        nothing to browse or search by name.
+      </p>
+
+      <div class="menu-grid">
+        <a class="menu-card" href="/find/photos">
+          <span class="menu-card-title">Find my photos</span>
+          <span class="hint">Every after-service photo you appear in.</span>
+        </a>
+        <a class="menu-card" href="/find/reactions">
+          <span class="menu-card-title">Find reaction photos</span>
+          <span class="hint">Moments like singing, dancing, and clapping.</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/background-slideshow.js"></script>
+  <script>initBackgroundSlideshow('neutral');</script>
+</body>
+</html>
