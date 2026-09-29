@@ -671,3 +671,16 @@ tbody tr:last-child td { border-bottom: none; }
   display: block;
   background: rgba(242, 239, 233, 0.05);
 }
+/* Footer */
+.footer__bottom {
+  margin-top: 60px;
+  padding: 24px 0 40px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.footer__bottom p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}

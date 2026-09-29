@@ -93,7 +93,15 @@
       font-size: 14px; font-weight: 600;
     }
     .site-header nav button:hover { background: rgba(255,255,255,0.06); }
-    .nav-muted { color: var(--muted); }
+    .nav-muted { 
+      color: var(--soft); 
+      background: transparent;
+      border: none;
+    }
+    .nav-muted:hover { 
+      background: rgba(255,255,255,0.06); 
+      color: var(--ink);
+    }
 
     /* ── Find page layout ── */
     .find-page {
@@ -634,6 +642,20 @@
     }
     .logout-form button:hover { background: rgba(255,255,255,0.06); color: var(--ink); }
 
+    /* ── Footer ── */
+    .footer__bottom {
+      margin-top: 60px;
+      padding: 24px 0 40px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
+    .footer__bottom p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     /* ── Login ── */
     .login-wrap { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
     .login-card {
@@ -661,8 +683,8 @@
         </span>
       </div>
     </a>
-    <a href="/admin" style="text-decoration:none">
-      <button class="logout-form">&larr; Back to admin</button>
+    <a href="/admin" class="brand-button" style="text-decoration:none">
+      <button class="nav-muted">&larr; Back to admin</button>
     </a>
   </header>
 
@@ -709,6 +731,10 @@
       <p class="empty-state">No admin actions recorded yet.</p>
       {% endif %}
     </div>
+  </div>
+
+  <div class="footer__bottom">
+    <p>&copy; 2026 Mawuenam Anyawoe. All rights reserved.</p>
   </div>
 </body>
 </html>
