@@ -93,7 +93,15 @@
       font-size: 14px; font-weight: 600;
     }
     .site-header nav button:hover { background: rgba(255,255,255,0.06); }
-    .nav-muted { color: var(--muted); }
+    .nav-muted { 
+      color: var(--soft); 
+      background: transparent;
+      border: none;
+    }
+    .nav-muted:hover { 
+      background: rgba(255,255,255,0.06); 
+      color: var(--ink);
+    }
 
     /* ── Find page layout ── */
     .find-page {
@@ -393,6 +401,57 @@
       .find-page { width: min(100% - 24px, 480px); padding-top: 36px; }
       .camera-card { border-radius: 23px; }
       .camera-screen { margin: 8px; border-radius: 17px; }
+      
+      /* Admin mobile fixes */
+      .admin-page { width: min(100% - 16px, 980px); }
+      
+      /* Make table horizontally scrollable on mobile */
+      .panel { padding: 20px 16px; }
+      table { 
+        font-size: 13px;
+        width: 100%;
+        min-width: 600px;
+      }
+      .panel:has(table) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      /* Adjust table cells for mobile */
+      thead th { padding: 0 8px 8px; font-size: 10px; }
+      tbody td { padding: 12px 8px; }
+      
+      /* Stack action buttons vertically on very small screens */
+      .row-actions { 
+        min-width: 120px;
+        flex-direction: column; 
+        gap: 4px; 
+        align-items: stretch;
+      }
+      .row-actions .btn-small { 
+        min-height: 28px; 
+        padding: 0 8px; 
+        font-size: 11px;
+        white-space: nowrap;
+      }
+      
+      /* Progress elements */
+      .progress-track { width: 80px; }
+      .progress-count { font-size: 10px; }
+      
+      /* Hide less important columns on very small screens */
+      @media (max-width: 480px) {
+        table th:nth-child(2),
+        table td:nth-child(2) { display: none; } /* Hide Folder ID column */
+        
+        table th:nth-child(3),
+        table td:nth-child(3) { display: none; } /* Hide Added date column */
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .page-intro { align-items: flex-start; }
+      .page-intro h1 { font-size: 28px; }
     }
   
     /* ── Admin section additions (same design system as /find) ── */
@@ -634,6 +693,20 @@
     }
     .logout-form button:hover { background: rgba(255,255,255,0.06); color: var(--ink); }
 
+    /* ── Footer ── */
+    .footer__bottom {
+      margin-top: 60px;
+      padding: 24px 0 40px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
+    .footer__bottom p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     /* ── Login ── */
     .login-wrap { min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
     .login-card {
@@ -800,6 +873,10 @@
         <p class="empty-state">No folders added yet. Paste one above to get started.</p>
       {% endif %}
     </div>
+  </div>
+
+  <div class="footer__bottom">
+    <p>&copy; 2026 Mawuenam Anyawoe. All rights reserved.</p>
   </div>
 
   <script>
