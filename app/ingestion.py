@@ -171,7 +171,6 @@ def process_folder(folder_id: int, control=None) -> None:
                             bounding_box=json.dumps(list(face.bounding_box)),
                         )
                         new_face_ids.append(new_face_id)
-                        new_face_ids.append(new_face_id)
                         # Pre-generate the face thumbnail now while image_bytes
                         # is already in memory, so /admin/clusters doesn't
                         # trigger a burst of concurrent Drive re-downloads on

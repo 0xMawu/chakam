@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=League+Gothic:wght@400&display=swap');
 
 :root {
   /* Project Aperture inspired palette — cinematic, dark, editorial */
@@ -49,7 +49,9 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: 
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><g fill="%23ffffff" opacity="0.04"><g transform="translate(30,50) rotate(15)"><path d="M20 35c-1-1-2-2-4-2-3 0-5 2-5 5 0 6 9 12 9 12s9-6 9-12c0-3-2-5-5-5-2 0-3 1-4 2z"/><path d="M18 32l4-8 2 0-2 8z"/><path d="M22 32l4-8 2 0-2 8z"/></g><g transform="translate(180,120) rotate(-25)"><path d="M15 5l5 10-5 10-5-10z"/><path d="M10 15l10 5-10 5z"/><path d="M20 15l10 5-10 5z"/><path d="M15 25l5 10-5 10-5-10z"/></g><g transform="translate(250,80) rotate(35)"><circle cx="15" cy="15" r="12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 15h14M15 8v14"/><path d="M10 10l10 10M10 20l10-10"/></g><g transform="translate(80,200) rotate(-15)"><path d="M20 35c-1-1-2-2-4-2-3 0-5 2-5 5 0 6 9 12 9 12s9-6 9-12c0-3-2-5-5-5-2 0-3 1-4 2z"/><path d="M18 32l4-8 2 0-2 8z"/><path d="M22 32l4-8 2 0-2 8z"/></g><g transform="translate(120,40) rotate(45)"><path d="M15 5l5 10-5 10-5-10z"/><path d="M10 15l10 5-10 5z"/><path d="M20 15l10 5-10 5z"/><path d="M15 25l5 10-5 10-5-10z"/></g></g></svg>') repeat,
+    var(--paper);
   color: var(--ink);
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 15px;
@@ -373,25 +375,32 @@ tbody tr:last-child td { border-bottom: none; }
   transform: scaleX(-1);
 }
 
-/* CHAKAM branding — eyebrow uses Fraunces Bold, capitalised */
+/* CHAKAM branding — eyebrow uses League Gothic Bold with gold gradient */
 .masthead .eyebrow,
 .masthead .eyebrow a,
 .login-card .eyebrow {
-  font-family: 'Fraunces', serif;
-  font-weight: 700;
+  font-family: 'League Gothic', serif;
+  font-weight: 400;
   font-style: normal;
-  font-size: 13px;
+  font-size: 16px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--wine);
+  background: linear-gradient(90deg, #c98a4b 0%, #e0a468 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Page headings also go bold (not italic) for CHAKAM */
+/* Page headings also go bold League Gothic for CHAKAM */
 .masthead h1,
 .login-card h1 {
-  font-family: 'Fraunces', serif;
-  font-weight: 700;
+  font-family: 'League Gothic', serif;
+  font-weight: 400;
   font-style: normal;
+  background: linear-gradient(90deg, #c98a4b 0%, #e0a468 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .find-actions {
@@ -675,7 +684,7 @@ tbody tr:last-child td { border-bottom: none; }
 .footer__bottom {
   margin-top: 60px;
   padding: 24px 0 40px;
-  border-top: 2px solid var(--rule);
+  border-top: 1px solid rgba(201,138,75,0.45);
   text-align: center;
 }
 .footer__bottom p {
