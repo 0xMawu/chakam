@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — CHAKAM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&family=League+Gothic:wght@400&display=swap" rel="stylesheet">
 <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -31,7 +31,10 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at 50% 10%, rgba(108,99,71,0.15), transparent 34rem), #11120f;
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><g fill="%23ffffff" opacity="0.03"><g transform="translate(20,30) rotate(15)"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></g><g transform="translate(120,80) rotate(-25)"><path d="M12.5 2C17.19 2 21 5.81 21 10.5S17.19 19 12.5 19 4 15.19 4 10.5 7.81 2 12.5 2zm0 2C8.91 4 6 6.91 6 10.5S8.91 17 12.5 17s6.5-2.91 6.5-6.5S16.09 4 12.5 4zm-1 2.5l3 3-3 3v-2H8v-2h3.5v-2z"/></g><g transform="translate(160,150) rotate(45)"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12h8M12 8v8"/></g><g transform="translate(60,120) rotate(-10)"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></g></g></svg>') repeat,
+        radial-gradient(circle at 50% 10%, rgba(108,99,71,0.15), transparent 34rem), 
+        #11120f;
       color: var(--ink);
       font-family: "DM Sans", sans-serif;
       font-size: 15px;
@@ -77,9 +80,14 @@
     }
     .brand-copy { display: grid; }
     .brand-copy strong {
-      font-family: "DM Serif Display", serif;
-      font-size: 20px; font-weight: 400; letter-spacing: 0.01em;
-      color: var(--soft);
+      font-family: "League Gothic", serif;
+      font-size: 24px; 
+      font-weight: 400; 
+      letter-spacing: 0.05em;
+      background: linear-gradient(90deg, #d9b675 0%, #f1d49a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .brand-copy small {
       margin-top: 1px; color: var(--muted);
@@ -697,7 +705,7 @@
     .footer__bottom {
       margin-top: 60px;
       padding: 24px 0 40px;
-      border-top: 1px solid var(--line);
+      border-top: 2px solid var(--line);
       text-align: center;
     }
     .footer__bottom p {
@@ -726,7 +734,12 @@
     <a href="/find" class="brand-button" style="text-decoration:none">
       <div class="brand">
         <span class="brand-mark">
-          <img src="data:image/png;base64,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" alt="">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="18" cy="18" r="17" fill="none" stroke="#d9b675" stroke-width="2"/>
+            <path d="M12 24l-2-2c-3-3-5-5-5-8 0-2 2-4 4-4 1 0 2 0 3 1 1-1 2-1 3-1 2 0 4 2 4 4 0 3-2 5-5 8l-2 2z" fill="#d9b675"/>
+            <path d="M22 15l2-2 2 2-2 2-2-2z" fill="#f1d49a"/>
+            <circle cx="26" cy="12" r="3" fill="none" stroke="#f1d49a" stroke-width="1"/>
+          </svg>
         </span>
         <span class="brand-copy">
           <strong>CHAKAM</strong>

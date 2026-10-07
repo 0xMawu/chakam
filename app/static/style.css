@@ -675,7 +675,7 @@ tbody tr:last-child td { border-bottom: none; }
 .footer__bottom {
   margin-top: 60px;
   padding: 24px 0 40px;
-  border-top: 1px solid var(--rule);
+  border-top: 2px solid var(--rule);
   text-align: center;
 }
 .footer__bottom p {
