@@ -68,6 +68,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS idx_faces_cluster_id ON faces(cluster_id);
 CREATE INDEX IF NOT EXISTS idx_faces_photo_id ON faces(photo_id);
 CREATE INDEX IF NOT EXISTS idx_photos_folder_id ON photos(folder_id);
+
+CREATE TABLE IF NOT EXISTS watcher_state (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 """
 
 
@@ -121,6 +126,25 @@ def get_connection():
     finally:
         conn.close()
 
+def get_watcher_state(key: str) -> str | None:
+    """Read one value from the watcher key/value store.
+    Returns None when the key has never been written."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT value FROM watcher_state WHERE key = ?", (key,)
+        ).fetchone()
+        return row["value"] if row else None
+
+
+def set_watcher_state(key: str, value: str) -> None:
+    """Upsert one value in the watcher key/value store."""
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT INTO watcher_state (key, value) VALUES (?, ?) "
+            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (key, value),
+        )
+        conn.commit()
 
 def add_folder(drive_folder_id: str, drive_folder_url: str, label: str) -> int:
     with get_connection() as conn:
