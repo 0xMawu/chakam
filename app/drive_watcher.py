@@ -51,43 +51,45 @@ def _now_utc_iso() -> str:
 
 def _list_outside_subfolders(service, parent_id: str, modified_since: str | None) -> list[dict]:
     """
-    List all subfolders of `parent_id` named "outside" (case-insensitive).
-    We intentionally ignore modified_since and always fetch all subfolders —
-    Drive's modifiedTime on subfolders is unreliable for detecting new folders,
-    so we let the DB (folder_exists check) handle deduplication instead.
+    Recursively walk the entire folder tree under parent_id at any depth
+    and return every subfolder named "outside" (case-insensitive).
+    modified_since is ignored — the DB folder_exists check handles deduplication.
     """
-    query = " and ".join([
-        f"'{parent_id}' in parents",
-        "trashed = false",
-        f"mimeType = '{_FOLDER_MIME}'",
-    ])
-
     results: list[dict] = []
-    page_token = None
 
-    while True:
-        response = (
-            service.files()
-            .list(
-                q=query,
-                spaces="drive",
-                fields="nextPageToken, files(id, name)",
-                pageToken=page_token,
-                pageSize=100,
-                supportsAllDrives=True,
-                includeItemsFromAllDrives=True,
+    def walk(folder_id: str, path: str) -> None:
+        page_token = None
+        while True:
+            response = (
+                service.files()
+                .list(
+                    q=f"'{folder_id}' in parents and trashed = false and mimeType = '{_FOLDER_MIME}'",
+                    spaces="drive",
+                    fields="nextPageToken, files(id, name)",
+                    pageToken=page_token,
+                    pageSize=100,
+                    supportsAllDrives=True,
+                    includeItemsFromAllDrives=True,
+                )
+                .execute()
             )
-            .execute()
-        )
 
-        for f in response.get("files", []):
-            if f["name"].strip().lower() == _TARGET_FOLDER_NAME:
-                results.append({"id": f["id"], "name": f["name"]})
+            for f in response.get("files", []):
+                current_path = f"{path}/{f['name']}"
+                if f["name"].strip().lower() == _TARGET_FOLDER_NAME:
+                    # Found an 'outside' folder — register it but don't
+                    # recurse into it (photos live here, not more folders)
+                    results.append({"id": f["id"], "name": f["name"]})
+                    logger.debug("Watcher: found 'outside' at %s", current_path)
+                else:
+                    # Not 'outside' — recurse into it
+                    walk(f["id"], current_path)
 
-        page_token = response.get("nextPageToken")
-        if not page_token:
-            break
+            page_token = response.get("nextPageToken")
+            if not page_token:
+                break
 
+    walk(parent_id, "")
     return results
 
 def _build_folder_url(folder_id: str) -> str:
