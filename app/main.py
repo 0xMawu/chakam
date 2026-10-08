@@ -53,7 +53,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, clustering, database, ingest_queue, ingestion, matching, object_storage, security, tokens
+from app import auth, clustering, database, drive_watcher, ingest_queue, ingestion, matching, object_storage, security, tokens
 from app.drive_utils import InvalidDriveFolderLink, extract_folder_id
 from app.face_processing import ImageDecodeError, detect_faces
 
@@ -123,6 +123,8 @@ def on_startup():
         ingest_queue.reconcile_stuck_folders()
     except Exception:
         logger.exception("Skipping stuck-folder reconciliation -- couldn't reach Redis.")
+
+    drive_watcher.start()   # ← add this
 
 
 @app.get("/", response_class=HTMLResponse)
