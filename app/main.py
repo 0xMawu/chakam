@@ -37,6 +37,9 @@ needed more than "it works" before pointing this at real users:
     the query patterns used throughout database.py don't degrade to full
     table scans as the photo library grows.
 """
+from dotenv import load_dotenv
+load_dotenv()
+
 import base64
 import binascii
 import hmac
