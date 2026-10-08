@@ -52,27 +52,15 @@ def _now_utc_iso() -> str:
 def _list_outside_subfolders(service, parent_id: str, modified_since: str | None) -> list[dict]:
     """
     List all subfolders of `parent_id` named "outside" (case-insensitive).
-
-    If `modified_since` is an RFC 3339 timestamp string, only folders
-    modified after that time are returned — this keeps each poll cheap
-    for a large parent with many subfolders.  On the very first run
-    (modified_since=None) all matching subfolders are returned.
-
-    Returns a list of dicts: {"id": str, "name": str}.
+    We intentionally ignore modified_since and always fetch all subfolders —
+    Drive's modifiedTime on subfolders is unreliable for detecting new folders,
+    so we let the DB (folder_exists check) handle deduplication instead.
     """
-    # Build the query
-    # Note: Drive's `name contains` is case-insensitive for ASCII, but to
-    # be explicit we filter by exact name in Python after the API call so
-    # we don't accidentally pick up "outside_extra" or "outside-photos".
-    query_parts = [
+    query = " and ".join([
         f"'{parent_id}' in parents",
         "trashed = false",
         f"mimeType = '{_FOLDER_MIME}'",
-    ]
-    if modified_since:
-        query_parts.append(f"modifiedTime > '{modified_since}'")
-
-    query = " and ".join(query_parts)
+    ])
 
     results: list[dict] = []
     page_token = None
@@ -102,21 +90,50 @@ def _list_outside_subfolders(service, parent_id: str, modified_since: str | None
 
     return results
 
-
 def _build_folder_url(folder_id: str) -> str:
     """Canonical Drive URL for a folder — same format the admin pastes."""
     return f"https://drive.google.com/drive/folders/{folder_id}"
 
 
 def _start_ingestion(db_folder_id: int) -> None:
-    """
-    Kick off ingestion for a DB folder in a daemon thread.
-    Mirrors the logic in main.py's /admin/folders/{id}/process route exactly.
-    """
     import threading
-    from app import ingestion as _ingestion
+    from app import clustering, database, ingestion as _ingestion
     from app.ingest_queue import RedisControl
 
+    def _run():
+        control = RedisControl(folder_id=db_folder_id)
+        _ingestion.process_folder(db_folder_id, control=control)
+
+        # Auto-recluster after ingestion finishes, whether it succeeded
+        # or partially errored — new faces are in the DB either way and
+        # should be clustered so matching picks them up immediately.
+        folder = database.get_folder(db_folder_id)
+        if folder and folder["status"] in ("processed", "error"):
+            logger.info(
+                "Watcher: auto-reclustering after ingestion of folder id=%s", db_folder_id
+            )
+            try:
+                summary = clustering.run_clustering()
+                logger.info(
+                    "Watcher: recluster complete — %d faces → %d clusters, %d unclustered",
+                    summary["faces"], summary["clusters"], summary["unclustered"],
+                )
+                database.record_audit_log(
+                    "watcher_auto_recluster",
+                    f"folder id={db_folder_id}: {summary['faces']} faces → "
+                    f"{summary['clusters']} clusters, {summary['unclustered']} unclustered",
+                )
+            except Exception:
+                logger.exception(
+                    "Watcher: auto-recluster failed for folder id=%s — "
+                    "faces are ingested and searchable via incremental clustering, "
+                    "run 'Recluster all faces' in the admin UI to fix groupings",
+                    db_folder_id,
+                )
+
+    t = threading.Thread(target=_run, daemon=True, name=f"ingest-watcher-{db_folder_id}")
+    t.start()
+    logger.info("Watcher: started ingestion thread for folder id=%s", db_folder_id)
     def _run():
         control = RedisControl(folder_id=db_folder_id)
         _ingestion.process_folder(db_folder_id, control=control)
